@@ -1,0 +1,71 @@
+---
+title: "My_app"
+author: "Hardison Everett"
+date: "4/2/2021"
+output: ioslides_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Shiny App
+
+This is a presentation for my shiny app that makes exploring the `Titanic` data set fast and easy.  
+
+Rather than continuously modifying code to explore different variables, just pick variables 
+from the drop downs.
+
+## Normal Workflow
+
+```{r normal_workflow, echo=TRUE, fig.height=3, fig.width=5}
+library(ggplot2)
+Titanic_df<-as.data.frame(Titanic)
+ggplot(Titanic_df)+
+        geom_col(aes(x = Class, y = Freq, fill = Survived))+
+        theme_minimal()
+```
+
+## Shiny App
+
+```{r shiny_app, echo = FALSE}
+library(shiny)
+shinyApp(
+        shinyUI(fluidPage(
+                titlePanel("Explore the Titanic Data Set"),
+                sidebarLayout(
+                        sidebarPanel(
+                        h3("Choose Variables!"),
+                        varSelectInput("x","X Axis",data = Titanic_df, multiple = FALSE),
+                        varSelectInput("group","Group",data = Titanic_df, multiple = FALSE)
+                ),
+                mainPanel(
+                        h3("Titanic"),
+                        plotOutput("plot1"),
+                        h4("Pick variables from the drop downs on the side panel to explore the
+                           titanic dataset.")
+                )
+        )
+)),
+
+        shinyServer(function(input, output){
+                output$plot1 <- renderPlot({
+                        Titanic_df <- as.data.frame(Titanic)
+                        x <- as.character(input$x)
+                        g <- as.character(input$group)
+                        ggplot()+
+                                geom_col(aes(x = Titanic_df[,x], y = Titanic_df$Freq,
+                                     fill = Titanic_df[,g]))+
+                                xlab(label = x)+
+                                ylab(label = "Count")+
+                                guides(fill = guide_legend(title = g))+
+                                theme_minimal()
+        })
+}))
+```
+
+## Thanks
+
+
+
